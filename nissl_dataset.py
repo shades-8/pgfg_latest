@@ -60,6 +60,11 @@ class Nissl_Dataset(Dataset):
         
         input_image = cv2.resize(input_image,(Width,Height))
         
+        cell_mask[511,0] = 0
+        cell_mask[511,1] = 1
+        cell_mask[511,2] = 2
+        cell_mask[511,3] = 3
+
         
         mask = np.zeros((Width,Height),dtype=np.uint8)
         if self.multiclass:
@@ -75,6 +80,13 @@ class Nissl_Dataset(Dataset):
         if self.transforms:
 
             input_image,mask = self.transform(input_image,mask)
+        else :
+          input_image = torch.from_numpy(input_image).permute(2,0,1)
+          mask = torch.from_numpy(mask)
             
 
-        return input_image,mask
+        #converting 
+        input_image = input_image.numpy()
+        onehot_mask = torch.nn.functional.one_hot(mask.to(torch.long))
+        onehot_mask = onehot_mask.permute(2,0,1).numpy()
+        return input_image,onehot_mask#np.expand_dims(onehot_mask,0)

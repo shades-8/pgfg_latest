@@ -20,15 +20,15 @@ torch.manual_seed(0)
 np.random.seed(0)
 
 # ------------------------parameters--------------------#
-batch_size = 4
+batch_size = 6
 INPUT_CHANNELS = 3
-OUTPUT_CHANNELS = 1
+OUTPUT_CHANNELS = 4
 MODEL_SAVE_PATH = "unet_cell1.pt"
 # ------------------------dataset-----------------------#
 train_dataset = Nissl_Dataset(root_dir='Nissl_Dataset/train')
 train_dataset_len = train_dataset.__len__()
 
-test_dataset = Nissl_Dataset(root_dir='Nissl_Dataset/test')
+test_dataset = Nissl_Dataset(root_dir='Nissl_Dataset/test',Transforms=False)
 test_dataset_len = test_dataset.__len__()
 # ------------------------creating model file-----------------------#
 try:
@@ -128,10 +128,10 @@ def train_model(model, optimizer, scheduler, num_epochs=20):
                 inputs = torch.true_divide(inputs, 255)
                 inputs = inputs.type(torch.float)
                 labels = labels.type(torch.float)
-                labels = labels.unsqueeze(1)
+                
                 inputs = inputs.to(device)
                 labels = labels.to(device)
-
+                
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
@@ -140,7 +140,7 @@ def train_model(model, optimizer, scheduler, num_epochs=20):
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     loss = calc_loss(outputs, labels, metrics)
-
+                    
                     # backward + optimize only if in training phase
                     if phase == 'train':
                         loss.backward()
